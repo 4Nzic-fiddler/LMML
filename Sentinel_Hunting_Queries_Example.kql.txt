@@ -1,0 +1,74 @@
+// NOTE: Running these queries requires you to first install the Sysmon custom function
+
+// Look at all the Sysmon records - not too helpful because there are too many!
+Sysmon
+
+// Hypothesis: threat actors run host profiling & recon commands
+Sysmon
+| where ProcessCommandLine has_any ("whoami", "net ", "net1", "nltest", "systeminfo", "tasklist", "dsquery", "qwinsta")
+| project TimeGenerated, DeviceName, AccountName, RenderedDescription, ProcessCommandLine, InitiatingProcessCommandLine, ProcessGuid, InitiatingProcessGuid
+
+
+
+
+
+// Investigate process and its children
+let process_guid="{REPLACE WITH YOUR PROCESS GUID}";
+Sysmon
+| where ProcessGuid == process_guid
+  or InitiatingProcessGuid == process_guid
+| extend DetailSummary = strcat(iff(isnotempty(ProcessCommandLine), "cmd: ", ""), ProcessCommandLine, 
+                                iff(isnotempty(InitiatingProcessCommandLine), " ### parent: ", ""), InitiatingProcessCommandLine, 
+                                iff(isnotempty(FileName), " file: ", ""), FileName, 
+                                iff(isnotempty(DestinationIp), " ip: ", ""), DestinationIp, 
+                                iff(isnotempty(RegistryKey), " reg: ", ""), RegistryKey, 
+                                iff(isnotempty(DnsQueryName), " dns: ", ""), DnsQueryName)
+| project TimeGenerated, DeviceName, RenderedDescription, DetailSummary, ProcessCommandLine, InitiatingProcessCommandLine, FileName, DestinationIp, RegistryKey
+| order by TimeGenerated asc
+
+
+
+
+// Network Summary
+let process_guid="{REPLACE WITH YOUR PROCESS GUID}";
+Sysmon
+| where ProcessGuid == process_guid
+  or InitiatingProcessGuid == process_guid
+| where EventID == 3
+| summarize count(), min(TimeGenerated), max(TimeGenerated) by ProcessGuid, ProcessPath, DestinationIp
+
+
+
+
+
+Sysmon
+| where EventID == 3
+| summarize count(), min(TimeGenerated), max(TimeGenerated) by ProcessGuid, ProcessPath, DestinationIp
+
+
+
+
+// Network beacon hunt
+let TimeDeltaThreshold = 2; // don't count anything under 2 seconds between connections
+let TotalEventsThreshold = 15; // only show beaconing that had at least 15 connections
+let DurationThreshold = 900; // only show beaconing that lasted at least 15 minutes
+let StandardDeviationThreshold = 100; // Set to filter out false positives: lower number is tighter filtering/fewer results
+Sysmon
+| where EventID==3
+| project TimeGenerated, DeviceName, ProcessPath, SourceIp, SourcePort, DestinationIp, DestinationPort
+| sort by SourceIp asc, DestinationIp asc, TimeGenerated asc // sort to put all connections between two hosts next to each other in time order
+| serialize 
+| extend nextTimeGenerated = next(TimeGenerated, 1), nextDeviceId = next(DeviceName, 1), nextDstIP = next(DestinationIp, 1) 
+| extend TimeDeltaInSeconds = datetime_diff("second", nextTimeGenerated, TimeGenerated) // compute time difference between subsequent connections
+| where DeviceName == nextDeviceId and nextDstIP == DestinationIp // only compute time difference if next host pair is the same as current
+| where TimeDeltaInSeconds > TimeDeltaThreshold // filter out connections that happen too close together
+| project TimeGenerated, TimeDeltaInSeconds, DeviceName, ProcessPath, SourceIp, SourcePort, DestinationIp, DestinationPort
+| summarize avg(TimeDeltaInSeconds), count(), min(TimeGenerated), max(TimeGenerated),  // compute statistics including standard deviation
+Duration=datetime_diff("second", max(TimeGenerated), min(TimeGenerated)), 
+StandardDeviation=stdevp(TimeDeltaInSeconds), TimeDeltaList=make_list(TimeDeltaInSeconds) by DeviceName, ProcessPath, SourceIp, DestinationIp
+| where count_ > TotalEventsThreshold 
+// comment out the next line if you don't want to filter out short-term beacons that aren't still active
+//| where count_ > datetime_diff("second", ago(endtime), min_TimeGenerated) / (avg_TimeDeltaInSeconds*2)
+| where StandardDeviation < StandardDeviationThreshold
+| where Duration >= DurationThreshold
+| order by StandardDeviation asc
