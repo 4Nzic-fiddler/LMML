@@ -31,7 +31,7 @@ This makes it much easier to write KQL queries for Sentinel data
 
 ## Saved Queries for Threat Hunting
 This has just a few example threat hunting queries to get started with. There are many more...
-https://github.com/4Nzic-fiddler/LMML/commit/af1e4b7a77e1c586e509471c9b4b21d55e6f8d42
+https://raw.githubusercontent.com/4Nzic-fiddler/LMML/main/Sentinel_Hunting_Queries_Example.kql.txt
 
 
 
