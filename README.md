@@ -19,6 +19,8 @@ https://github.com/olafhartong/sysmon-modular
 Binary Defense Sysmon Modular (by @thehack3r4chan)
 https://github.com/BinaryDefense/sysmon-modular
 
+## Ideas for Purple Team scenarios to run:
+* Scythe Community threat plans: https://github.com/scythe-io/community-threats
 
 ## KQL Learning Resources
 * https://security-tzu.com/2020/08/07/become-a-kql-ninja/
