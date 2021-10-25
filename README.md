@@ -23,7 +23,7 @@ https://github.com/BinaryDefense/sysmon-modular
 * Scythe Community threat plans: https://github.com/scythe-io/community-threats
 
 ## KQL Learning Resources
-* https://security-tzu.com/2020/08/07/become-a-kql-ninja/
+* ~~https://security-tzu.com/2020/08/07/become-a-kql-ninja/~~ (sadly, the server is down now)
 * https://github.com/secgroundzero/KQL_Reference_Manual
 
 
