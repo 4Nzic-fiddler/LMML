@@ -1,5 +1,5 @@
-# Circle City Con 8.0 Training: LMML
-Repository of resources for the "Less Money, More Lab" class at CircleCityCon 8.0
+# Less Money, More Lab: Building a Shared Security Research Lab with your Friends
+Repository of resources for the "Less Money, More Lab" class first presented at CircleCityCon 8.0
 
 ## Meron's How to Setup a Lab Blog:
 https://blacklionm.medium.com/my-journey-how-to-setup-a-new-lab-environment-275de32d91b1
@@ -23,7 +23,7 @@ https://github.com/BinaryDefense/sysmon-modular
 * Scythe Community threat plans: https://github.com/scythe-io/community-threats
 
 ## KQL Learning Resources
-* ~~https://security-tzu.com/2020/08/07/become-a-kql-ninja/~~ (sadly, the server is down now)
+* ~~https://security-tzu.com/2020/08/07/become-a-kql-ninja/~~ (sadly, the server is down now, see archived copy in this repo)
 * https://github.com/secgroundzero/KQL_Reference_Manual
 
 
@@ -35,9 +35,3 @@ This makes it much easier to write KQL queries for Sentinel data
 This has just a few example threat hunting queries to get started with. There are many more...
 https://raw.githubusercontent.com/4Nzic-fiddler/LMML/main/Sentinel_Hunting_Queries_Example.kql.txt
 
-
-
-
-## Azure Sentinel shared access - lets other lab members query the events in your Sentinel
-Allow Delegated Access to the LMML Class Group to have Azure Sentinel Contributor role in your Log Analytics Workspace:
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2F4Nzic-fiddler%2FLMML%2Fmain%2FAzureLighthouseARM-BD-APO.json)
